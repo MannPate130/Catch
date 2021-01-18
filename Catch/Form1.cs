@@ -39,9 +39,28 @@ namespace Catch
         Random randGen = new Random();
         int randValue = 0;
 
+        string gameState = "waiting";
+
         public Form1()
         {
             InitializeComponent();
+        }
+
+        public void GameInitialize()
+        {
+            titleLabel.Text = "";
+            subTitleLabel.Text = "";
+
+            gameTimer.Enabled = true;
+            gameState = "running";
+            time = 500;
+            score = 0;
+            ballXList.Clear();
+            ballYList.Clear();
+            ballSpeedList.Clear();
+
+            heroX = this.Width / 2 - heroWidth / 2;
+            heroY = 540;
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -53,6 +72,18 @@ namespace Catch
                     break;
                 case Keys.Right:
                     rightDown = true;
+                    break;
+                case Keys.Space:
+                    if (gameState == "waiting" || gameState == "over")
+                    {
+                        GameInitialize();
+                    }
+                    break;
+                case Keys.Escape:
+                    if (gameState == "waiting" || gameState == "over")
+                    {
+                        Application.Exit();
+                    }
                     break;
             }
 
@@ -80,6 +111,7 @@ namespace Catch
             if (time == 0)
             {
                 gameTimer.Enabled = false;
+                gameState = "over";
             }
 
             //move hero character
@@ -171,36 +203,44 @@ namespace Catch
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            // draw text at top and ground at bottom
-            e.Graphics.DrawString($"Time Left: {time}", screenFont, whiteBrush, 10, 10);
-            e.Graphics.DrawString($"Score: {score}", screenFont, whiteBrush, 450, 10);
-            e.Graphics.FillRectangle(greenBrush, 0, 550, 600, 50);
-
-            //draw hero
-            e.Graphics.FillRectangle(whiteBrush, heroX, heroY, heroWidth, heroHeight);
-
-            //draw balls
-            for (int i = 0; i < ballXList.Count(); i++)
+            if (gameState == "waiting")
             {
-                if (ballColourList[i] == "red")
+                titleLabel.Text = "BALL CATCH";
+                subTitleLabel.Text = "Press Space Bar to Start or Escape to Exit";
+            }
+            else if (gameState == "running")
+            {
+                // draw text at top and ground at bottom
+                e.Graphics.DrawString($"Time Left: {time}", screenFont, whiteBrush, 10, 10);
+                e.Graphics.DrawString($"Score: {score}", screenFont, whiteBrush, 450, 10);
+                e.Graphics.FillRectangle(greenBrush, 0, 550, 600, 50);
+
+                //draw hero
+                e.Graphics.FillRectangle(whiteBrush, heroX, heroY, heroWidth, heroHeight);
+
+                //draw balls
+                for (int i = 0; i < ballXList.Count(); i++)
                 {
-                    e.Graphics.FillEllipse(redBrush, ballXList[i], ballYList[i], ballSize, ballSize);
-                }
-                else if (ballColourList[i] == "green")
-                {
-                    e.Graphics.FillEllipse(greenBrush, ballXList[i], ballYList[i], ballSize, ballSize);
-                }
-                else if (ballColourList[i] == "gold")
-                {
-                    e.Graphics.FillEllipse(goldBrush, ballXList[i], ballYList[i], ballSize, ballSize);
+                    if (ballColourList[i] == "red")
+                    {
+                        e.Graphics.FillEllipse(redBrush, ballXList[i], ballYList[i], ballSize, ballSize);
+                    }
+                    else if (ballColourList[i] == "green")
+                    {
+                        e.Graphics.FillEllipse(greenBrush, ballXList[i], ballYList[i], ballSize, ballSize);
+                    }
+                    else if (ballColourList[i] == "gold")
+                    {
+                        e.Graphics.FillEllipse(goldBrush, ballXList[i], ballYList[i], ballSize, ballSize);
+                    }
                 }
             }
-
-            //if game timer is not running, (game is over), show message and final score
-            if (gameTimer.Enabled == false)
+            else if (gameState == "over")
             {
-                e.Graphics.DrawString($"GAME OVER \n\n" +
-                $"Your final score was {score}", screenFont, whiteBrush, 200, 200);
+                titleLabel.Text = "GAME OVER";
+
+                subTitleLabel.Text = $"Your final score was {score}";
+                subTitleLabel.Text += "\nPress Space Bar to Start or Escape to Exit";
             }
 
 
